@@ -122,8 +122,7 @@ public class FileService {
     /**
      * Метод выводит результаты парсинга файлов на консоль.
      * Данный метод вызывается в методах processCSV(), processJSON()
-     * и будет вызываться в методе processXLSX(), когда последний
-     * будет реализован.
+     * и processXLSX().
      */
     public static void writeLines(List<String[]> array, String fileName){
         int count = 1;
