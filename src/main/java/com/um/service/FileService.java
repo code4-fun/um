@@ -35,7 +35,7 @@ public class FileService {
             lines = reader.readAll();
         } catch (IOException e){
             System.out.println("{\"id\":" + "--" + ", \"amount\":" + "--" +
-                    ", \"comment\":\"" + "--" + "\", \"filename\":\"" + "myFile.tbt" + "\", \"line\":" +
+                    ", \"comment\":\"" + "--" + "\", \"filename\":\"" + fileName + "\", \"line\":" +
                     "--" + ", \"result\":" + "\"" + "Exception in CSV File" + "\" }");
         }
         if(lines != null && lines.size() != 0){
@@ -54,31 +54,32 @@ public class FileService {
         String str;
         while((str = br.readLine()) != null){
             ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> map = null;
+            Map<String, String> map;
 
             try{
                 map = objectMapper.readValue(str, new TypeReference<Map<String,String>>(){});
+                List<String> array = new ArrayList<>();
+                if(map != null && map.containsKey("orderId")){
+                    array.add(map.get("orderId"));
+                }
+                if(map != null && map.containsKey("amount")){
+                    array.add(map.get("amount"));
+                }
+                if(map != null && map.containsKey("currency")){
+                    array.add(map.get("currency"));
+                }
+                if(map != null && map.containsKey("comment")){
+                    array.add(map.get("comment"));
+                }
+
+                lines.add(array.toArray(new String[0]));
+
             } catch (IOException e){
                 System.out.println("{\"id\":" + "--" + ", \"amount\":" + "--" +
                         ", \"comment\":\"" + "--" + "\", \"filename\":\"" + fileName + "\", \"line\":" +
-                        count + ", \"result\":" + "\"" + "Exception in JSON File" + "\" }");
+                        count + ", \"result\":" + "\"" + "Wrong line format" + "\" }");
             }
-
-            List<String> array = new ArrayList<>();
-            if(map != null && map.containsKey("orderId")){
-                array.add(map.get("orderId"));
-            }
-            if(map != null && map.containsKey("amount")){
-                array.add(map.get("amount"));
-            }
-            if(map != null && map.containsKey("currency")){
-                array.add(map.get("currency"));
-            }
-            if(map != null && map.containsKey("comment")){
-                array.add(map.get("comment"));
-            }
-
-            lines.add(array.toArray(new String[0]));
+            count++;
         }
 
         if(lines.size() != 0){
@@ -87,7 +88,7 @@ public class FileService {
     }
 
     /**
-     * В методе будет впоследствии выполняться парсинг XLSX-файлов
+     * В методе выполняется парсинг XLSX-файлов
      */
     public void processXLSX(String fileName) throws IOException {
         List<String[]> lines = new ArrayList<>();
@@ -121,8 +122,7 @@ public class FileService {
     /**
      * Метод выводит результаты парсинга файлов на консоль.
      * Данный метод вызывается в методах processCSV(), processJSON()
-     * и будет вызываться в методе processXLSX(), когда последний
-     * будет реализован.
+     * и processXLSX().
      */
     public static void writeLines(List<String[]> array, String fileName){
         int count = 1;
