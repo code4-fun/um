@@ -58,7 +58,6 @@ public class FileService {
 
             try{
                 map = objectMapper.readValue(str, new TypeReference<Map<String,String>>(){});
-
                 List<String> array = new ArrayList<>();
                 if(map != null && map.containsKey("orderId")){
                     array.add(map.get("orderId"));
@@ -89,7 +88,7 @@ public class FileService {
     }
 
     /**
-     * В методе будет впоследствии выполняться парсинг XLSX-файлов
+     * В методе выполняется парсинг XLSX-файлов
      */
     public void processXLSX(String fileName) throws IOException {
         List<String[]> lines = new ArrayList<>();
