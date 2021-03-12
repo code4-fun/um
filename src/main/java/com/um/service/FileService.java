@@ -28,8 +28,8 @@ public class FileService {
      * В методе выполняется парсинг CSV-файлов
      */
     public void processCSV(String fileName) throws FileNotFoundException {
-        CSVReader reader = new CSVReader(new FileReader(fileName));
         List<String[]> lines = null;
+        CSVReader reader = new CSVReader(new FileReader(fileName));
 
         try{
             lines = reader.readAll();
@@ -38,6 +38,7 @@ public class FileService {
                     ", \"comment\":\"" + "--" + "\", \"filename\":\"" + fileName + "\", \"line\":" +
                     "--" + ", \"result\":" + "\"" + "Exception in CSV File" + "\" }");
         }
+
         if(lines != null && lines.size() != 0){
             writeLines(lines, fileName);
         }
@@ -46,19 +47,19 @@ public class FileService {
     /**
      * В методе выполняется парсинг JSON-файлов
      */
-    public void processJSON(String fileName) throws IOException {
+    public void processJSON(String fileName) throws FileNotFoundException {
         List<String[]> lines = new ArrayList<>();
         BufferedReader br = new BufferedReader(new FileReader(fileName));
         int count = 1;
-
         String str;
-        while((str = br.readLine()) != null){
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> map;
 
-            try{
+        try{
+            while((str = br.readLine()) != null){
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, String> map;
                 map = objectMapper.readValue(str, new TypeReference<Map<String,String>>(){});
                 List<String> array = new ArrayList<>();
+
                 if(map != null && map.containsKey("orderId")){
                     array.add(map.get("orderId"));
                 }
@@ -73,13 +74,12 @@ public class FileService {
                 }
 
                 lines.add(array.toArray(new String[0]));
-
-            } catch (IOException e){
-                System.out.println("{\"id\":" + "--" + ", \"amount\":" + "--" +
-                        ", \"comment\":\"" + "--" + "\", \"filename\":\"" + fileName + "\", \"line\":" +
-                        count + ", \"result\":" + "\"" + "Wrong line format" + "\" }");
+                count++;
             }
-            count++;
+        } catch (IOException e){
+            System.out.println("{\"id\":" + "--" + ", \"amount\":" + "--" +
+                    ", \"comment\":\"" + "--" + "\", \"filename\":\"" + fileName + "\", \"line\":" +
+                    count + ", \"result\":" + "\"" + "Wrong line format" + "\" }");
         }
 
         if(lines.size() != 0){
@@ -90,28 +90,34 @@ public class FileService {
     /**
      * В методе выполняется парсинг XLSX-файлов
      */
-    public void processXLSX(String fileName) throws IOException {
+    public void processXLSX(String fileName) {
         List<String[]> lines = new ArrayList<>();
 
-        XSSFWorkbook workbook = new XSSFWorkbook(new FileInputStream(fileName));
-        XSSFSheet sheet = workbook.getSheetAt(0);
-        for (Row row : sheet) {
-            Iterator<Cell> cells = row.iterator();
-            List<String> array = new ArrayList<>();
-            while (cells.hasNext()) {
-                Cell cell = cells.next();
-                CellType cellTypeEnum = cell.getCellType();
-                if (cellTypeEnum.name().equals("NUMERIC")) {
-                    NumberFormat nf = DecimalFormat.getInstance(Locale.ENGLISH);
-                    nf.setMinimumFractionDigits(0);
-                    double nn = cell.getNumericCellValue();
-                    String format = nf.format(nn);
-                    array.add(format);
-                } else if (cellTypeEnum.name().equals("STRING")) {
-                    array.add(cell.getStringCellValue());
+        try{
+            XSSFWorkbook workbook = new XSSFWorkbook(new FileInputStream(fileName));
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            for (Row row : sheet) {
+                Iterator<Cell> cells = row.iterator();
+                List<String> array = new ArrayList<>();
+                while (cells.hasNext()) {
+                    Cell cell = cells.next();
+                    CellType cellTypeEnum = cell.getCellType();
+                    if (cellTypeEnum.name().equals("NUMERIC")) {
+                        NumberFormat nf = DecimalFormat.getInstance(Locale.ENGLISH);
+                        nf.setMinimumFractionDigits(0);
+                        double nn = cell.getNumericCellValue();
+                        String format = nf.format(nn);
+                        array.add(format);
+                    } else if (cellTypeEnum.name().equals("STRING")) {
+                        array.add(cell.getStringCellValue());
+                    }
                 }
+                lines.add(array.toArray(new String[0]));
             }
-            lines.add(array.toArray(new String[0]));
+        } catch (IOException e){
+            System.out.println("{\"id\":" + "--" + ", \"amount\":" + "--" +
+                    ", \"comment\":\"" + "--" + "\", \"filename\":\"" + fileName + "\", \"line\":" +
+                    "--" + ", \"result\":" + "\"" + "Exception in XLSX File" + "\" }");
         }
 
         if(lines.size() != 0){

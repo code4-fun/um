@@ -54,19 +54,13 @@ public class UmApplication implements CommandLineRunner {
 							es.submit(() -> {
 								try {
 									fileService.processJSON(item);
-								} catch (IOException e) {
+								} catch (FileNotFoundException e) {
 									e.getMessage();
 								}
 							});
 							break;
 						case "xlsx":
-							es.submit(() -> {
-								try {
-									fileService.processXLSX(item);
-								} catch (IOException e) {
-									e.getMessage();
-								}
-							});
+							es.submit(() -> fileService.processXLSX(item));
 							break;
 						default:
 							System.out.println(item + " is wrong file name");
